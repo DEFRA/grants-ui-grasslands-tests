@@ -1,96 +1,114 @@
-grants-ui-grasslands-tests
+# grants-ui-grasslands-tests
 
-The template to create a service that runs WDIO tests against an environment.
+Playwright journey test suite for the Grasslands grant.
 
-- [Local](#local)
-  - [Requirements](#requirements)
-    - [Node.js](#nodejs)
-  - [Setup](#setup)
-  - [Running local tests](#running-local-tests)
-  - [Debugging local tests](#debugging-local-tests)
-- [Production](#production)
-  - [Debugging tests](#debugging-tests)
-- [Licence](#licence)
-  - [About the licence](#about-the-licence)
+## What This Tests
 
-## Local Development
+This test suite provides journey testing coverage for:
 
-### Requirements
+- Grasslands grant application journeys served by [grants-ui](https://github.com/DEFRA/grants-ui)
 
-#### Node.js
+## Technology Stack
 
-Please install [Node.js](http://nodejs.org/) `>= v20` and [npm](https://nodejs.org/) `>= v9`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+- **Playwright** - Browser automation framework
+- **Node.js 24+** - Runtime environment
 
-To use the correct version of Node.js for this application, via nvm:
+## Prerequisites
+
+- Node.js `>=24.15.0 <25.0.0` (check with `node --version`)
+- npm (comes with Node.js)
+
+## Quick Start
+
+### 1. Clone and Install
 
 ```bash
-nvm use
-```
-
-### Setup
-
-Install application dependencies:
-
-```bash
+git clone https://github.com/DEFRA/grants-ui-grasslands-tests.git
+cd grants-ui-grasslands-tests
 npm install
+npx playwright install chromium
 ```
 
-### Running local tests
-
-Start application you are testing on the url specified in `baseUrl` [wdio.local.conf.js](wdio.local.conf.js)
+### 2. Run Tests
 
 ```bash
 npm run test:local
 ```
 
-### Debugging local tests
+Default environment variables for local runs are set in `playwright.local.config.js`. Override any of them by creating a `.env` file in the project root.
+
+## Running the Test Suite
+
+There are three Playwright configuration files for different environments:
+
+### Local Development — playwright.local.config.js
 
 ```bash
-npm run test:local:debug
+npm run test:local
 ```
 
-## Production
+- Runs against `http://localhost:3000`
+- Headed browser (visible)
+- Report opens automatically on failure
 
-### Running the tests
+### CDP Portal — playwright.cdp.config.js
 
-Tests are run from the CDP-Portal under the Test Suites section. Before any changes can be run, a new docker image must be built, this will happen automatically when a pull request is merged into the `main` branch.
-You can check the progress of the build under the actions section of this repository. Builds typically take around 1-2 minutes.
+```bash
+npm test
+```
 
-The results of the test run are made available in the portal.
+- Runs against the CDP environment specified by the `ENVIRONMENT` env var
+- Base URL pattern: `https://grants-ui.${ENVIRONMENT}.cdp-int.defra.cloud`
+- Triggered via the CDP Portal under Test Suites
+- Publishes an HTML report to S3
 
-## Requirements of CDP Environment Tests
+### CI Pipeline — playwright.ci.config.js
 
-1. Your service builds as a docker container using the `.github/workflows/publish.yml`
-   The workflow tags the docker images allowing the CDP Portal to identify how the container should be run on the platform.
-   It also ensures its published to the correct docker repository.
+```bash
+npm run test:ci
+```
 
-2. The Dockerfile's entrypoint script should return exit code of 0 if the test suite passes or 1/>0 if it fails
+- Runs against the URL specified by the `BASE_URL` env var
+- Used in the `grants-ui` GitHub Actions CI pipeline
+- Automated execution on creating and updating a `grants-ui` PR
+- No report generated, console logging only
 
-3. Test reports should be published to S3 using the script in `./bin/publish-tests.sh`
+## Test Coverage
 
-## Running on GitHub
+| Spec | Description |
+|---|---|
+| `smoke.spec.js` | Navigates to the grasslands start page and confirms it loads. |
 
-Alternatively you can run the test suite as a GitHub workflow.
-Test runs on GitHub are not able to connect to the CDP Test environments. Instead, they run the tests agains a version of the services running in docker.
-A docker compose `compose.yml` is included as a starting point, which includes the databases (mongodb, redis) and infrastructure (localstack) pre-setup.
+## Project Structure
 
-Steps:
+```
+grants-ui-grasslands-tests/
+├── test/
+│   └── specs/
+├── playwright.cdp.config.js    # CDP Portal config
+├── playwright.local.config.js  # Local development config
+└── playwright.ci.config.js     # CI pipeline config
+```
 
-1. Edit the compose.yml to include your services.
-2. Modify the scripts in docker/scripts to pre-populate the database, if required and create any localstack resources.
-3. Test the setup locally with `docker compose up` and `npm run test:github`
-4. Set up the workflow trigger in `.github/workflows/journey-tests`.
+## Test Reports
 
-By default, the provided workflow will run when triggered manually from GitHub or when triggered by another workflow.
+The native Playwright HTML report is used. When running on CDP, the report is automatically published to S3 and made available in the portal.
 
-If you want to use the repository exclusively for running docker composed based test suites consider displaying the publish.yml workflow.
+## Troubleshooting
 
-## BrowserStack
+### Tests Won't Run
 
-Two wdio configuration files are provided to help run the tests using BrowserStack in both a GitHub workflow (`wdio.github.browserstack.conf.js`) and from the CDP Portal (`wdio.browserstack.conf.js`).
-They can be run from npm using the `npm run test:browserstack` (for running via portal) and `npm run test:github:browserstack` (from GitHib runner).
-See the CDP Documentation for more details.
+- Ensure you have the correct Node.js version: `node --version` should be `>=24.15.0 <25.0.0`
+- Ensure the service under test is running and accessible at the configured base URL
+- Run `npx playwright install chromium` if the browser is not installed
+
+## Related Repositories
+
+- [grants-ui](https://github.com/DEFRA/grants-ui) - The main grants application UI service
+
+## Support
+
+For questions or issues with this test suite, please contact the Grants Application Enablement (GAE) team.
 
 ## Licence
 

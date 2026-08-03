@@ -23,7 +23,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Build the test suite
-        uses: DEFRA/cdp-build-action/build-test@main
+      - name: Build and Publish
+        uses: DEFRA/cdp-build-action/build@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

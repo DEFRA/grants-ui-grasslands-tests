@@ -153,7 +153,7 @@ test.describe('Grasslands application', () => {
       await expect(page).toHaveURL('/grasslands/declaration')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Submit your application')
       await analyzeAccessibility(page)
-      await page.getByRole('button', { name: 'I agree - submit my application' }).click()
+      await page.getByRole('button', { name: 'Confirm and submit' }).click()
     })
 
     await test.step('confirmation', async () => {

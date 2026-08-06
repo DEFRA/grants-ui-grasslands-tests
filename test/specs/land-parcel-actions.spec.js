@@ -59,8 +59,9 @@ test.describe('Grasslands select actions for land parcel', () => {
   })
 })
 
-function selectParcelOnMap(page, parcelId) {
-  return page.evaluate(
+async function selectParcelOnMap(page, parcelId) {
+  await page.locator('#parcel-map').waitFor({ state: 'attached' })
+  await page.evaluate(
     (id) =>
       document
         .getElementById('parcel-map')

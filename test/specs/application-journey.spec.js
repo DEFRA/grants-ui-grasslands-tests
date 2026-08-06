@@ -14,7 +14,7 @@ test.describe('Grasslands application', () => {
     await clearApplicationData(SBI, GRANT_CODE)
   })
 
-  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci', '@runme'] }, async ({ page }) => {
+  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci'] }, async ({ page }) => {
     let referenceNumber
     await test.step('authentication', async () => {
       await authenticateTo(page, 'grasslands', CRN)
@@ -119,13 +119,11 @@ test.describe('Grasslands application', () => {
       await analyzeAccessibility(page)
 
       const cligCheckbox = page.getByRole('checkbox', { name: /CLIG3/ })
-      const cligRefreshBanner = cligCheckbox.locator(
-        'xpath=ancestor::div[contains(@class, "govuk-checkboxes__item")]//div[contains(@class, "select-actions-refresh-banner")]'
-      )
+
+      const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
       await cligCheckbox.click()
+      await landGrantsResponse
       await expect(cligCheckbox).toBeChecked()
-      // Checking the box triggers an async availability refresh; wait for its "Updating..." banner to clear.
-      await expect(cligRefreshBanner).toHaveCount(0)
 
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })

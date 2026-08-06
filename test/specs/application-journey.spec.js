@@ -14,7 +14,7 @@ test.describe('Grasslands application', () => {
     await clearApplicationData(SBI, GRANT_CODE)
   })
 
-  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci'] }, async ({ page }) => {
+  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci', '@runme'] }, async ({ page }) => {
     let referenceNumber
     await test.step('authentication', async () => {
       await authenticateTo(page, 'grasslands', CRN)
@@ -209,8 +209,12 @@ function assertTaskStatuses(page, tasks) {
   )
 }
 
-function selectParcelOnMap(page, parcelId) {
-  return page.evaluate(
+async function selectParcelOnMap(page, parcelId) {
+  // parcel-selection-summary starts hidden and is only unhidden once the map's
+  // 'parcel-map:ready' handler has run - by then the page's own selection
+  // listener is guaranteed to be attached too.
+  await page.locator('#parcel-selection-summary').waitFor({ state: 'visible' })
+  await page.evaluate(
     (id) =>
       document
         .getElementById('parcel-map')

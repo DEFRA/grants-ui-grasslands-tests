@@ -12,7 +12,7 @@ test.describe('Grasslands select actions for land parcel', () => {
     await clearApplicationData(SBI, GRANT_CODE)
   })
 
-  test('selecting an action for a land parcel correctly enables and disables other actions', { tag: ['@cdp', '@ci'] }, async ({ page }) => {
+  test('selecting an action for a land parcel correctly enables and disables other actions', { tag: ['@cdp', '@ci', '@runme'] }, async ({ page }) => {
     await test.step('authentication', async () => {
       await authenticateTo(page, 'grasslands', CRN)
     })
@@ -60,7 +60,10 @@ test.describe('Grasslands select actions for land parcel', () => {
 })
 
 async function selectParcelOnMap(page, parcelId) {
-  await page.locator('#parcel-map').waitFor({ state: 'attached' })
+  // parcel-selection-summary starts hidden and is only unhidden once the map's
+  // 'parcel-map:ready' handler has run - by then the page's own selection
+  // listener is guaranteed to be attached too.
+  await page.locator('#parcel-selection-summary').waitFor({ state: 'visible' })
   await page.evaluate(
     (id) =>
       document

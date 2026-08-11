@@ -59,22 +59,29 @@ test.describe('Grasslands select actions for land parcel', () => {
 
 async function selectParcelOnMap(page, id, areaHa) {
   // The page's parcel-map:selection listener is attached as soon as
-  // parcel-select-page.js runs, independent of the map actually finishing
-  // loading - so it's enough to wait for the element to be attached before
-  // dispatching. #selected-parcel-details only becomes visible afterwards,
-  // as a result of this dispatch.
+  // parcel-select-page.js runs, but the element can be attached
+  // before that listener is actually wired up, so a single dispatch can
+  // be dropped. Retry the dispatch until #selected-parcel-details becomes
+  // visible as a result of it.
   await page.locator('#parcel-map').waitFor({ state: 'attached' })
-  await page.evaluate(
-    ({ id, areaHa }) => {
-      const [sheet_id, parcel_id] = id.split('-')
-      document.getElementById('parcel-map').dispatchEvent(
-        new CustomEvent('parcel-map:selection', {
-          bubbles: true,
-          detail: { selectedParcels: [{ id, sheet_id, parcel_id, areaHa }] }
-        })
-      )
-    },
-    { id, areaHa }
-  )
-  await page.locator('#selected-parcel-details').waitFor({ state: 'visible' })
+
+  const dispatchSelection = () =>
+    page.evaluate(
+      ({ id, areaHa }) => {
+        const [sheet_id, parcel_id] = id.split('-')
+        document.getElementById('parcel-map').dispatchEvent(
+          new CustomEvent('parcel-map:selection', {
+            bubbles: true,
+            detail: { selectedParcels: [{ id, sheet_id, parcel_id, areaHa }] }
+          })
+        )
+      },
+      { id, areaHa }
+    )
+
+  const selectedParcelDetails = page.locator('#selected-parcel-details')
+  await expect(async () => {
+    await dispatchSelection()
+    await expect(selectedParcelDetails).toBeVisible({ timeout: 1000 })
+  }).toPass({ timeout: 30000 })
 }

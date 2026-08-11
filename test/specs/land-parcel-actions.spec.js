@@ -5,14 +5,13 @@ import { clearApplicationData } from '../utils/backend.js'
 const CRN = '1103313150'
 const SBI = '106514040'
 const GRANT_CODE = 'grasslands'
-const PARCEL_ID = 'SK0971-5761'
 
 test.describe('Grasslands select actions for land parcel', () => {
   test.beforeEach(async () => {
     await clearApplicationData(SBI, GRANT_CODE)
   })
 
-  test('selecting an action for a land parcel correctly enables and disables other actions', { tag: ['@cdp', '@ci', '@runme'] }, async ({ page }) => {
+  test('selecting an action for a land parcel correctly enables and disables other actions', { tag: ['@cdp', '@ci'] }, async ({ page }) => {
     await test.step('authentication', async () => {
       await authenticateTo(page, 'grasslands', CRN)
     })
@@ -36,8 +35,7 @@ test.describe('Grasslands select actions for land parcel', () => {
       await page.getByRole('link', { name: 'Select the land and actions you want to apply for' }).click()
 
       await expect(page).toHaveURL('/grasslands/select-land-parcel')
-      await selectParcelOnMap(page, PARCEL_ID)
-      await expect(page.locator('#parcel-selection-summary')).toHaveText(`Selected: ${PARCEL_ID}`)
+      await selectParcelOnMap(page, 'SK0971-5761', 11.1006)
       await page.locator('#map-select-continue').click()
 
       await expect(page).toHaveURL(/\/grasslands\/select-actions-for-land-parcel/)
@@ -59,16 +57,24 @@ test.describe('Grasslands select actions for land parcel', () => {
   })
 })
 
-async function selectParcelOnMap(page, parcelId) {
-  // parcel-selection-summary starts hidden and is only unhidden once the map's
-  // 'parcel-map:ready' handler has run - by then the page's own selection
-  // listener is guaranteed to be attached too.
-  await page.locator('#parcel-selection-summary').waitFor({ state: 'visible' })
+async function selectParcelOnMap(page, id, areaHa) {
+  // The page's parcel-map:selection listener is attached as soon as
+  // parcel-select-page.js runs, independent of the map actually finishing
+  // loading - so it's enough to wait for the element to be attached before
+  // dispatching. #selected-parcel-details only becomes visible afterwards,
+  // as a result of this dispatch.
+  await page.locator('#parcel-map').waitFor({ state: 'attached' })
   await page.evaluate(
-    (id) =>
-      document
-        .getElementById('parcel-map')
-        .dispatchEvent(new CustomEvent('parcel-map:selection', { bubbles: true, detail: { selectedIds: [id] } })),
-    parcelId
+    ({ id, areaHa }) => {
+      const [sheet_id, parcel_id] = id.split('-')
+      document.getElementById('parcel-map').dispatchEvent(
+        new CustomEvent('parcel-map:selection', {
+          bubbles: true,
+          detail: { selectedParcels: [{ id, sheet_id, parcel_id, areaHa }] }
+        })
+      )
+    },
+    { id, areaHa }
   )
+  await page.locator('#selected-parcel-details').waitFor({ state: 'visible' })
 }

@@ -61,6 +61,7 @@ npm test
 - Base URL pattern: `https://grants-ui.${ENVIRONMENT}.cdp-int.defra.cloud`
 - Triggered via the CDP Portal under Test Suites
 - Publishes an HTML report to S3
+- Runs in Microsoft Edge (Playwright's `msedge` channel). The CDP Portal runner is Linux, so this is the Linux build of Edge rather than true Windows Edge — best endeavours coverage, not a substitute for testing on Windows Edge directly
 
 ### CI Pipeline — playwright.ci.config.js
 

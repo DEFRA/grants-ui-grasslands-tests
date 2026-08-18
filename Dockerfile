@@ -20,6 +20,7 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
+RUN npx playwright install --with-deps msedge
 COPY . .
 ENTRYPOINT [ "./entrypoint.sh" ]
 

@@ -168,7 +168,14 @@ test.describe('Grasslands application', () => {
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
 
-    await test.step('select-actions-for-land-parcel -> tasks', async () => {
+    await test.step('select-actions-for-land-parcel -> confirm-land-and-actions', async () => {
+      await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Your land and actions')
+      await analyzeAccessibility(page)
+      await page.getByRole('button', { name: 'Save and continue' }).click()
+    })
+
+    await test.step('confirm-land-and-actions -> tasks', async () => {
       await expect(page).toHaveURL('/grasslands/tasks')
       await assertTaskStatuses(page, [
         { name: 'Are these details correct?', status: 'Completed' },

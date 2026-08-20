@@ -9,7 +9,7 @@ if [ -z "$TAG" ]; then
   exit 1
 fi
 
-echo "Fetching grasslands/fg-gas-backend/grasslands.json at tag $TAG"
+echo "Fetching grasslands/gas/gas.json at tag $TAG"
 mkdir -p test/schemas
-curl -fL --ssl-no-revoke "https://raw.githubusercontent.com/DEFRA/grants-config-grasslands/$TAG/configurations/grasslands/fg-gas-backend/grasslands.json" -o test/schemas/gas.schema.json
+curl -fL --ssl-no-revoke "https://raw.githubusercontent.com/DEFRA/grants-config-grasslands/$TAG/configurations/grasslands/gas/gas.json" -o test/schemas/gas.schema.json
 echo "Saved to test/schemas/gas.schema.json"

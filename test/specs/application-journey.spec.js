@@ -170,7 +170,7 @@ test.describe('Grasslands application', () => {
 
     await test.step('select-actions-for-land-parcel -> confirm-land-and-actions', async () => {
       await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Your land and actions')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Review land parcels and actions')
       await analyzeAccessibility(page)
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })

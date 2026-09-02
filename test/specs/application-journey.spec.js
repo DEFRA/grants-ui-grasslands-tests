@@ -160,9 +160,9 @@ test.describe('Grasslands application', () => {
       })
 
       await test.step('all actions now show 0 hectares are available', async () => {
-        await expect(page.locator('#landActionQuantity_CSAM3-hint')).toHaveText('0 hectares available')
-        await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('0 hectares available')
-        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('0 hectares available')
+        await expect(page.locator('#landActionQuantity_CSAM3-hint')).toHaveText('0.0000 hectares available')
+        await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('0.0000 hectares available')
+        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('0.0000 hectares available')
       })
 
       await page.getByRole('button', { name: 'Save and continue' }).click()

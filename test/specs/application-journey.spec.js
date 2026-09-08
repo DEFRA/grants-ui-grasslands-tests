@@ -14,7 +14,7 @@ test.describe('Grasslands application', () => {
     await clearApplicationData(SBI, GRANT_CODE)
   })
 
-  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci'] }, async ({ page }) => {
+  test('submits a Grasslands application exploring all pages from start to confirmation', { tag: ['@cdp', '@ci', '@runme'] }, async ({ page }) => {
     let referenceNumber
     await test.step('authentication', async () => {
       await authenticateTo(page, 'grasslands', CRN)
@@ -24,7 +24,7 @@ test.describe('Grasslands application', () => {
       await expect(page).toHaveURL('/grasslands/tasks')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Apply for a Grasslands agreement')
       await analyzeAccessibility(page)
-      await page.getByRole('link', { name: 'Are these details correct?' }).click()
+      await page.getByRole('link', { name: 'Check your details' }).click()
     })
 
     await test.step('check-details', async () => {
@@ -51,7 +51,7 @@ test.describe('Grasslands application', () => {
       await page.getByRole('button', { name: 'Continue' }).click()
 
       await expect(page).toHaveURL('/grasslands/check-your-land-details')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your land details')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your digital maps are correct')
       await analyzeAccessibility(page)
     })
 
@@ -65,7 +65,7 @@ test.describe('Grasslands application', () => {
       await page.getByRole('link', { name: 'Back', exact: true }).click()
 
       await expect(page).toHaveURL('/grasslands/check-your-land-details')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your land details')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your digital maps are correct')
     })
 
     await test.step('check-your-land-details -> management-control-of-land', async () => {
@@ -73,7 +73,7 @@ test.describe('Grasslands application', () => {
       await page.getByRole('button', { name: 'Save and continue' }).click()
 
       await expect(page).toHaveURL('/grasslands/management-control-of-land')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Management control of land')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Confirm you have management control of all the land in your application')
       await analyzeAccessibility(page)
     })
 
@@ -87,7 +87,7 @@ test.describe('Grasslands application', () => {
       await page.getByRole('link', { name: 'Back', exact: true }).click()
 
       await expect(page).toHaveURL('/grasslands/management-control-of-land')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Management control of land')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Confirm you have management control of all the land in your application')
     })
 
     await test.step('management-control-of-land -> tasks', async () => {
@@ -96,17 +96,17 @@ test.describe('Grasslands application', () => {
 
       await expect(page).toHaveURL('/grasslands/tasks')
       await assertTaskStatuses(page, [
-        { name: 'Are these details correct?', status: 'Completed' },
+        { name: 'Check your details', status: 'Completed' },
         { name: 'Confirm your land details are up to date', status: 'Completed' },
         { name: 'Confirm management control of the land', status: 'Completed' },
-        { name: 'Select the land and actions you want to apply for', status: 'Not started' },
+        { name: 'Select the land and the actions you want to apply for', status: 'Incomplete' },
       ])
-      await page.getByRole('link', { name: 'Select the land and actions you want to apply for' }).click()
+      await page.getByRole('link', { name: 'Select the land and the actions you want to apply for' }).click()
     })
 
     await test.step('select-land-parcel', async () => {
       await expect(page).toHaveURL('/grasslands/select-land-parcel')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Select land for your actions')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Select your land parcels')
       await analyzeAccessibility(page)
 
       await selectParcelOnMap(page, 'SD8545-7357', 11.1006)
@@ -178,11 +178,11 @@ test.describe('Grasslands application', () => {
     await test.step('confirm-land-and-actions -> tasks', async () => {
       await expect(page).toHaveURL('/grasslands/tasks')
       await assertTaskStatuses(page, [
-        { name: 'Are these details correct?', status: 'Completed' },
+        { name: 'Check your details', status: 'Completed' },
         { name: 'Confirm your land details are up to date', status: 'Completed' },
         { name: 'Confirm management control of the land', status: 'Completed' },
-        { name: 'Select the land and actions you want to apply for', status: 'Completed' },
-        { name: 'Check your answers', status: 'Not started' },
+        { name: 'Select the land and the actions you want to apply for', status: 'Completed' },
+        { name: 'Check your answers', status: 'Incomplete' },
       ])
       await page.getByRole('link', { name: 'Check your answers' }).click()
     })
@@ -198,12 +198,12 @@ test.describe('Grasslands application', () => {
       await expect(page).toHaveURL('/grasslands/declaration')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Submit your application')
       await analyzeAccessibility(page)
-      await page.getByRole('button', { name: 'Confirm and submit' }).click()
+      await page.getByRole('button', { name: 'I agree - submit my application' }).click()
     })
 
     await test.step('confirmation', async () => {
       await expect(page).toHaveURL('/grasslands/confirmation')
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Application submitted')
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Application complete')
       await analyzeAccessibility(page)
       await expect(page.locator('.govuk-panel__body')).toContainText(/GLD-[A-Z0-9]+-[A-Z0-9]+/)
       referenceNumber = await page.locator('.govuk-panel__body strong').textContent()
@@ -212,7 +212,7 @@ test.describe('Grasslands application', () => {
     await test.step('print-submitted-application', async () => {
       const [printTab] = await Promise.all([
         page.context().waitForEvent('page'),
-        page.getByRole('link', { name: 'View / Print submitted application' }).click(),
+        page.getByRole('link', { name: 'View and print submitted application (opens in new tab)' }).click(),
       ])
       await printTab.waitForLoadState()
       await expect(printTab).toHaveURL('/grasslands/print-submitted-application')

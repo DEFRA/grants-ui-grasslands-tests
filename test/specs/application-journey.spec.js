@@ -109,7 +109,7 @@ test.describe('Grasslands application', () => {
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Select your land parcels')
       await analyzeAccessibility(page)
 
-      await selectParcelOnMap(page, 'SD8545-7357', 11.1006)
+      await selectParcelOnMap(page, 'SD8545-7357', 11.5277)
       await page.locator('#map-select-continue').click()
     })
 
@@ -121,37 +121,32 @@ test.describe('Grasslands application', () => {
       await test.step('actions are listed in the correct order', async () => {
         const actionCheckboxes = page.locator('.govuk-checkboxes__item .govuk-checkboxes__input')
         const values = await actionCheckboxes.evaluateAll((inputs) => inputs.map((input) => input.value))
-        expect(values).toEqual(['CSAM3', 'HEF1', 'CLIG3', 'WBD1', 'SCR2'])
+        expect(values).toEqual(['CSAM3', 'CNUM2', 'HEF1', 'CLIG3', 'WBD1', 'SCR2'])
       })
 
-      const csam3Checkbox = page.getByRole('checkbox', { name: /CSAM3/ })
-      const scr2Checkbox = page.getByRole('checkbox', { name: /SCR2/ })
       const cligCheckbox = page.getByRole('checkbox', { name: /CLIG3/ })
 
-      await test.step('select CSAM3', async () => {
-        await csam3Checkbox.click()
-        await expect(csam3Checkbox).toBeChecked()
-        await expect(page.locator('#landActionQuantity_CSAM3-hint')).toHaveText('11.5033 hectares available')
+      for (const { code, quantity, available } of [
+        { code: 'CSAM3', quantity: '1.5', available: '11.5033' },
+        { code: 'CNUM2', quantity: '1', available: '10.0033' },
+        { code: 'SCR2', quantity: '2', available: '9.0033' },
+      ]) {
+        await test.step(`select ${code}`, async () => {
+          const checkbox = page.getByRole('checkbox', { name: new RegExp(code) })
+          const quantityInput = page.locator(`#landActionQuantity_${code}`)
+          await checkbox.click()
+          await expect(checkbox).toBeChecked()
+          await expect(page.locator(`#landActionQuantity_${code}-hint`)).toHaveText(`${available} hectares available`)
 
-        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
-        await page.locator('#landActionQuantity_CSAM3').fill('1.5')
-        await page.locator('#landActionQuantity_CSAM3').blur()
-        await landGrantsResponse
-      })
-
-      await test.step('select SCR2 ', async () => {
-        await scr2Checkbox.click()
-        await expect(scr2Checkbox).toBeChecked()
-        await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('10.0033 hectares available')
-
-        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
-        await page.locator('#landActionQuantity_SCR2').fill('2')
-        await page.locator('#landActionQuantity_SCR2').blur()
-        await landGrantsResponse
-      })
+          const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+          await quantityInput.fill(quantity)
+          await quantityInput.blur()
+          await landGrantsResponse
+        })
+      }
 
       await test.step('select CLIG3', async () => {
-        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('8.0033 hectares available')
+        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('7.0033 hectares available')
 
         const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
         await cligCheckbox.click()
@@ -161,6 +156,7 @@ test.describe('Grasslands application', () => {
 
       await test.step('all actions now show 0 hectares are available', async () => {
         await expect(page.locator('#landActionQuantity_CSAM3-hint')).toHaveText('0 hectares available')
+        await expect(page.locator('#landActionQuantity_CNUM2-hint')).toHaveText('0 hectares available')
         await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('0 hectares available')
         await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('0.0000 hectares available')
       })
@@ -171,6 +167,7 @@ test.describe('Grasslands application', () => {
     await test.step('select-actions-for-land-parcel -> confirm-land-and-actions', async () => {
       await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Review land parcels and actions')
+      await expect(page.locator('body')).toContainText('CNUM2')
       await analyzeAccessibility(page)
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
@@ -190,6 +187,7 @@ test.describe('Grasslands application', () => {
     await test.step('summary', async () => {
       await expect(page).toHaveURL('/grasslands/summary')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your answers')
+      await expect(page.locator('body')).toContainText('CNUM2')
       await analyzeAccessibility(page)
       await page.getByRole('button', { name: 'Continue' }).click()
     })
@@ -217,6 +215,7 @@ test.describe('Grasslands application', () => {
       await printTab.waitForLoadState()
       await expect(printTab).toHaveURL('/grasslands/print-submitted-application')
       await expect(printTab.getByRole('heading', { level: 1 })).toContainText('Apply for a Grasslands agreement')
+      await expect(printTab.locator('body')).toContainText('CNUM2')
       await expect(printTab.getByText(referenceNumber)).toBeVisible()
       await expect(printTab.getByRole('button', { name: 'Print this page' })).toBeVisible()
       await printTab.close()
@@ -232,6 +231,11 @@ test.describe('Grasslands application', () => {
         expect(request.body.json.metadata.crn).toEqual(CRN)
         expect(request.body.json.metadata.frn).toBeTruthy()
         expect(request.body.json.metadata.configVersion).toMatch(/^\d+\.\d+\.\d+$/)
+
+        const cnum2Action = request.body.json.answers.parcels
+          .find(({ parcelId }) => parcelId === 'SD8545-7357')
+          ?.actions.find(({ code }) => code === 'CNUM2')
+        expect(cnum2Action).toEqual({ code: 'CNUM2', value: 1, unit: 'ha' })
 
         const gasSchemaFile = await import('../schemas/gas.schema.json', { with: { type: 'json' } })
         const ajv = new Ajv2020({ strict: false, formats: { 'date-time': true } })

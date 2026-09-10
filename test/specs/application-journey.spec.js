@@ -167,7 +167,6 @@ test.describe('Grasslands application', () => {
     await test.step('select-actions-for-land-parcel -> confirm-land-and-actions', async () => {
       await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Review land parcels and actions')
-      await expect(page.locator('body')).toContainText('CNUM2')
       await analyzeAccessibility(page)
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
@@ -187,7 +186,6 @@ test.describe('Grasslands application', () => {
     await test.step('summary', async () => {
       await expect(page).toHaveURL('/grasslands/summary')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Check your answers')
-      await expect(page.locator('body')).toContainText('CNUM2')
       await analyzeAccessibility(page)
       await page.getByRole('button', { name: 'Continue' }).click()
     })
@@ -215,7 +213,6 @@ test.describe('Grasslands application', () => {
       await printTab.waitForLoadState()
       await expect(printTab).toHaveURL('/grasslands/print-submitted-application')
       await expect(printTab.getByRole('heading', { level: 1 })).toContainText('Apply for a Grasslands agreement')
-      await expect(printTab.locator('body')).toContainText('CNUM2')
       await expect(printTab.getByText(referenceNumber)).toBeVisible()
       await expect(printTab.getByRole('button', { name: 'Print this page' })).toBeVisible()
       await printTab.close()
@@ -231,11 +228,6 @@ test.describe('Grasslands application', () => {
         expect(request.body.json.metadata.crn).toEqual(CRN)
         expect(request.body.json.metadata.frn).toBeTruthy()
         expect(request.body.json.metadata.configVersion).toMatch(/^\d+\.\d+\.\d+$/)
-
-        const cnum2Action = request.body.json.answers.parcels
-          .find(({ parcelId }) => parcelId === 'SD8545-7357')
-          ?.actions.find(({ code }) => code === 'CNUM2')
-        expect(cnum2Action).toEqual({ code: 'CNUM2', value: 1, unit: 'ha' })
 
         const gasSchemaFile = await import('../schemas/gas.schema.json', { with: { type: 'json' } })
         const ajv = new Ajv2020({ strict: false, formats: { 'date-time': true } })

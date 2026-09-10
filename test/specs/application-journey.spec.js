@@ -121,7 +121,7 @@ test.describe('Grasslands application', () => {
       await test.step('actions are listed in the correct order', async () => {
         const actionCheckboxes = page.locator('.govuk-checkboxes__item .govuk-checkboxes__input')
         const values = await actionCheckboxes.evaluateAll((inputs) => inputs.map((input) => input.value))
-        expect(values).toEqual(['CSAM3', 'CLIG3', 'SCR2'])
+        expect(values).toEqual(['CSAM3', 'HEF1', 'CLIG3', 'WBD1', 'SCR2'])
       })
 
       const csam3Checkbox = page.getByRole('checkbox', { name: /CSAM3/ })

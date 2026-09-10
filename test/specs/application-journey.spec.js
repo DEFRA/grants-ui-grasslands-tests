@@ -121,12 +121,13 @@ test.describe('Grasslands application', () => {
       await test.step('actions are listed in the correct order', async () => {
         const actionCheckboxes = page.locator('.govuk-checkboxes__item .govuk-checkboxes__input')
         const values = await actionCheckboxes.evaluateAll((inputs) => inputs.map((input) => input.value))
-        expect(values).toEqual(['CSAM3', 'HEF1', 'CLIG3', 'WBD1', 'SCR2'])
+        expect(values).toEqual(['CSAM3', 'CNUM2', 'HEF1', 'CLIG3', 'WBD1', 'SCR2'])
       })
 
       const csam3Checkbox = page.getByRole('checkbox', { name: /CSAM3/ })
       const scr2Checkbox = page.getByRole('checkbox', { name: /SCR2/ })
       const cligCheckbox = page.getByRole('checkbox', { name: /CLIG3/ })
+      const cnum2Checkbox = page.getByRole('checkbox', { name: /CNUM2/ })
 
       await test.step('select CSAM3', async () => {
         await csam3Checkbox.click()
@@ -139,10 +140,21 @@ test.describe('Grasslands application', () => {
         await landGrantsResponse
       })
 
+      await test.step('select CNUM2', async () => {
+        await cnum2Checkbox.click()
+        await expect(cnum2Checkbox).toBeChecked()
+        await expect(page.locator('#landActionQuantity_CNUM2-hint')).toHaveText('10.0033 hectares available')
+
+        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await page.locator('#landActionQuantity_CNUM2').fill('1')
+        await page.locator('#landActionQuantity_CNUM2').blur()
+        await landGrantsResponse
+      })
+
       await test.step('select SCR2 ', async () => {
         await scr2Checkbox.click()
         await expect(scr2Checkbox).toBeChecked()
-        await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('10.0033 hectares available')
+        await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('9.0033 hectares available')
 
         const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
         await page.locator('#landActionQuantity_SCR2').fill('2')
@@ -151,7 +163,7 @@ test.describe('Grasslands application', () => {
       })
 
       await test.step('select CLIG3', async () => {
-        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('8.0033 hectares available')
+        await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('7.0033 hectares available')
 
         const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
         await cligCheckbox.click()
@@ -161,6 +173,7 @@ test.describe('Grasslands application', () => {
 
       await test.step('all actions now show 0 hectares are available', async () => {
         await expect(page.locator('#landActionQuantity_CSAM3-hint')).toHaveText('0 hectares available')
+        await expect(page.locator('#landActionQuantity_CNUM2-hint')).toHaveText('0 hectares available')
         await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('0 hectares available')
         await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('0.0000 hectares available')
       })

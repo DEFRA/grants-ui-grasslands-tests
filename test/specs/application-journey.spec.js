@@ -125,9 +125,11 @@ test.describe('Grasslands application', () => {
       })
 
       const csam3Checkbox = page.getByRole('checkbox', { name: /CSAM3/ })
-      const scr2Checkbox = page.getByRole('checkbox', { name: /SCR2/ })
-      const cligCheckbox = page.getByRole('checkbox', { name: /CLIG3/ })
       const cnum2Checkbox = page.getByRole('checkbox', { name: /CNUM2/ })
+      const hef1Checkbox = page.getByRole('checkbox', { name: /HEF1/ })
+      const cligCheckbox = page.getByRole('checkbox', { name: /CLIG3/ })
+      const wbd1Checkbox = page.getByRole('checkbox', { name: /WBD1/ })
+      const scr2Checkbox = page.getByRole('checkbox', { name: /SCR2/ })
 
       await test.step('select CSAM3', async () => {
         await csam3Checkbox.click()
@@ -151,7 +153,27 @@ test.describe('Grasslands application', () => {
         await landGrantsResponse
       })
 
-      await test.step('select SCR2 ', async () => {
+      await test.step('select HEF1', async () => {
+        await hef1Checkbox.click()
+        await expect(hef1Checkbox).toBeChecked()
+
+        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await page.locator('#landActionQuantity_HEF1').fill('100')
+        await page.locator('#landActionQuantity_HEF1').blur()
+        await landGrantsResponse
+      })
+
+      await test.step('select WBD1', async () => {
+        await wbd1Checkbox.click()
+        await expect(wbd1Checkbox).toBeChecked()
+
+        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await page.locator('#landActionQuantity_WBD1').fill('5')
+        await page.locator('#landActionQuantity_WBD1').blur()
+        await landGrantsResponse
+      })
+
+      await test.step('select SCR2', async () => {
         await scr2Checkbox.click()
         await expect(scr2Checkbox).toBeChecked()
         await expect(page.locator('#landActionQuantity_SCR2-hint')).toHaveText('9.0033 hectares available')
@@ -185,6 +207,24 @@ test.describe('Grasslands application', () => {
       await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Review land parcels and actions')
       await analyzeAccessibility(page)
+
+      await test.step('parcel summary shows all selected actions', async () => {
+        const table = page.locator('.land-parcel-summary__table')
+        await expect(table.getByRole('row', { name: /Herbal leys \(CSAM3\)/ })).toContainText('1.5000 ha')
+        await expect(table.getByRole('row', { name: /Legumes on improved grassland \(CNUM2\)/ })).toContainText('1.0000 ha')
+        await expect(table.getByRole('row', { name: /Maintain weatherproof traditional farm or forestry buildings \(HEF1\)/ })).toContainText('100 sqm')
+        await expect(table.getByRole('row', { name: /Manage grassland with very low nutrient inputs \(CLIG3\)/ })).toContainText('7.0033 ha')
+        await expect(table.getByRole('row', { name: /Manage ponds \(WBD1\)/ })).toContainText('5 count')
+        await expect(table.getByRole('row', { name: /Manage scrub and open habitat mosaics \(SCR2\)/ })).toContainText('2.0000 ha')
+        await expect(table.getByRole('row', { name: 'Subtotal' })).toContainText('£3,980.50')
+      })
+
+      await test.step('payment summary shows the total yearly payment', async () => {
+        const paymentSummary = page.locator('.payment-summary')
+        await expect(paymentSummary).toContainText('Total yearly payment')
+        await expect(paymentSummary).toContainText('£3,980.50')
+      })
+
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
 

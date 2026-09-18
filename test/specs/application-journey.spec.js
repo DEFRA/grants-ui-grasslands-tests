@@ -200,6 +200,19 @@ test.describe('Grasslands application', () => {
         await expect(page.locator('#landActionQuantity_CLIG3-hint')).toHaveText('0.0000 hectares available')
       })
 
+      await test.step('reject WBD1 on a parcel without pond land cover', async () => {
+        await page.getByRole('button', { name: 'Save and continue' }).click()
+        await expect(page.locator('.govuk-error-summary a[href="#landActionQuantity_WBD1"]')).toBeVisible()
+        await expect(wbd1Checkbox).toBeChecked()
+      })
+
+      await test.step('remove the ineligible pond action', async () => {
+        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await wbd1Checkbox.uncheck()
+        await landGrantsResponse
+        await expect(wbd1Checkbox).not.toBeChecked()
+      })
+
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
 
@@ -214,15 +227,15 @@ test.describe('Grasslands application', () => {
         await expect(table.getByRole('row', { name: /Legumes on improved grassland \(CNUM2\)/ })).toContainText('1.0000 ha')
         await expect(table.getByRole('row', { name: /Maintain weatherproof traditional farm or forestry buildings \(HEF1\)/ })).toContainText('100 sqm')
         await expect(table.getByRole('row', { name: /Manage grassland with very low nutrient inputs \(CLIG3\)/ })).toContainText('7.0033 ha')
-        await expect(table.getByRole('row', { name: /Manage ponds \(WBD1\)/ })).toContainText('5 count')
+        await expect(table.getByRole('row', { name: /Manage ponds \(WBD1\)/ })).toHaveCount(0)
         await expect(table.getByRole('row', { name: /Manage scrub and open habitat mosaics \(SCR2\)/ })).toContainText('2.0000 ha')
-        await expect(table.getByRole('row', { name: 'Subtotal' })).toContainText('£3,980.50')
+        await expect(table.getByRole('row', { name: 'Subtotal' })).toContainText('£2,695.50')
       })
 
       await test.step('payment summary shows the total yearly payment', async () => {
         const paymentSummary = page.locator('.payment-summary')
         await expect(paymentSummary).toContainText('Total yearly payment')
-        await expect(paymentSummary).toContainText('£3,980.50')
+        await expect(paymentSummary).toContainText('£2,695.50')
       })
 
       await page.getByRole('button', { name: 'Save and continue' }).click()

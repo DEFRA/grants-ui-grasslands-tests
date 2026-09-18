@@ -166,11 +166,18 @@ test.describe('Grasslands application', () => {
       await test.step('select WBD1', async () => {
         await wbd1Checkbox.click()
         await expect(wbd1Checkbox).toBeChecked()
+        await expect(wbd1Checkbox.locator('..')).toContainText('Payment rate per year: £257/pond')
+        await expect(page.locator('#landActionQuantity_WBD1').locator('..')).toContainText('ponds')
 
         const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
         await page.locator('#landActionQuantity_WBD1').fill('5')
         await page.locator('#landActionQuantity_WBD1').blur()
         await landGrantsResponse
+
+        const deselectionResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await wbd1Checkbox.uncheck()
+        await deselectionResponse
+        await expect(wbd1Checkbox).not.toBeChecked()
       })
 
       await test.step('select SCR2', async () => {
@@ -214,15 +221,14 @@ test.describe('Grasslands application', () => {
         await expect(table.getByRole('row', { name: /Legumes on improved grassland \(CNUM2\)/ })).toContainText('1.0000 ha')
         await expect(table.getByRole('row', { name: /Maintain weatherproof traditional farm or forestry buildings \(HEF1\)/ })).toContainText('100 sqm')
         await expect(table.getByRole('row', { name: /Manage grassland with very low nutrient inputs \(CLIG3\)/ })).toContainText('7.0033 ha')
-        await expect(table.getByRole('row', { name: /Manage ponds \(WBD1\)/ })).toContainText('5 count')
         await expect(table.getByRole('row', { name: /Manage scrub and open habitat mosaics \(SCR2\)/ })).toContainText('2.0000 ha')
-        await expect(table.getByRole('row', { name: 'Subtotal' })).toContainText('£3,980.50')
+        await expect(table.getByRole('row', { name: 'Subtotal' })).toContainText('£2,695.50')
       })
 
       await test.step('payment summary shows the total yearly payment', async () => {
         const paymentSummary = page.locator('.payment-summary')
         await expect(paymentSummary).toContainText('Total yearly payment')
-        await expect(paymentSummary).toContainText('£3,980.50')
+        await expect(paymentSummary).toContainText('£2,695.50')
       })
 
       await page.getByRole('button', { name: 'Save and continue' }).click()

@@ -200,6 +200,48 @@ test.describe('Grasslands application', () => {
         await expect(paymentSummary).toContainText('£2,195.50')
       })
 
+      await page.getByRole('button', { name: 'Add another land parcel' }).click()
+    })
+
+    await test.step('confirm-land-and-actions -> select-land-parcel (pond parcel)', async () => {
+      await expect(page).toHaveURL(/\/grasslands\/select-land-parcel/)
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Select your land parcels')
+
+      await selectParcelOnMap(page, 'SD8643-5887', 9.588)
+      await page.locator('#map-select-continue').click()
+    })
+
+    await test.step('select-actions-for-land-parcel (pond parcel)', async () => {
+      await expect(page).toHaveURL(/\/grasslands\/select-actions-for-land-parcel/)
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Select actions for this land parcel')
+
+      await test.step('select WBD1', async () => {
+        const wbd1Checkbox = page.getByRole('checkbox', { name: /WBD1/ })
+        await wbd1Checkbox.click()
+        await expect(wbd1Checkbox).toBeChecked()
+
+        const landGrantsResponse = page.waitForResponse((res) => res.url().includes('/api/land-grants/actions/'))
+        await page.locator('#landActionQuantity_WBD1').fill('2')
+        await page.locator('#landActionQuantity_WBD1').blur()
+        await landGrantsResponse
+      })
+
+      await page.getByRole('button', { name: 'Save and continue' }).click()
+    })
+
+    await test.step('select-actions-for-land-parcel -> confirm-land-and-actions (both parcels)', async () => {
+      await expect(page).toHaveURL('/grasslands/confirm-land-and-actions')
+
+      await test.step('pond parcel summary shows WBD1', async () => {
+        const pondTable = page.getByRole('table', { name: /SD8643.?5887/ })
+        await expect(pondTable.getByRole('row', { name: /Manage ponds \(WBD1\)/ })).toBeVisible()
+      })
+
+      await test.step('first parcel summary is unchanged', async () => {
+        const firstTable = page.getByRole('table', { name: /SD8545.?7357/ })
+        await expect(firstTable.getByRole('row', { name: 'Subtotal' })).toContainText('£2,195.50')
+      })
+
       await page.getByRole('button', { name: 'Save and continue' }).click()
     })
 

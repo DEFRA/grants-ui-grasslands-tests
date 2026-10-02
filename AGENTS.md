@@ -9,6 +9,8 @@ CDP Portal (and local) runner for the Grasslands grant journey tests. **This rep
 1. Resolves the latest `grants-config-grasslands` tag from `https://api.github.com/repos/DEFRA/grants-config-grasslands/tags` (`.[0].name`), the same lookup grants-ui uses. Set `GRASSLANDS_TAG` to pin a release instead.
 2. Downloads the source tarball at that tag and extracts it into `.grasslands-config/` (gitignored and dockerignored), replacing any previous copy.
 
+On CDP, GitHub is only reachable via the egress proxy. The script passes `CDP_HTTPS_PROXY` (falling back to `CDP_HTTP_PROXY`) to its own `curl` calls only, without exporting `HTTP(S)_PROXY`, so the browser's route to grants-ui is unchanged. Without the proxy the tags lookup returns nothing and Playwright never runs, which shows up as `/app/playwright-report is not found` at the publish step.
+
 Both Playwright configs set `testDir` to `./.grasslands-config/test/grants-ui/test/specs`. The spec reads the GAS schema by relative path (`configurations/grasslands/gas/gas.json` in the same tarball), so the whole repo is extracted rather than just `test/grants-ui`.
 
 The fetched code has no `node_modules` of its own. Its imports (`@playwright/test`, `@axe-core/playwright`, `ajv`, `mockserver-client`) resolve up to **this** repo's `node_modules`. Keep `package.json` dependencies in line with `grants-config-grasslands/test/grants-ui/package.json`, and keep `@playwright/test` in line with the `mcr.microsoft.com/playwright` tag in the `Dockerfile`. Don't install deps inside `.grasslands-config`: a second copy of `@playwright/test` breaks the runner.

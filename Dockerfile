@@ -24,6 +24,4 @@ RUN npx playwright install --with-deps msedge
 COPY . .
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-CMD ["npm", "test"]
-
 # This image downloads the linux amd64 AWS CLI. For M1 Macs build and run with the --platform=linux/amd64 argument.

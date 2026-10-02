@@ -1,6 +1,6 @@
 # grants-ui-grasslands-tests
 
-Playwright journey tests for the Grasslands grant application.
+CDP and local runner for the Grasslands grant journey tests, which live in `grants-config-grasslands`.
 
 ## Language
 
@@ -41,5 +41,9 @@ The `/tasks` page listing the grant journey's sections (Check before you start, 
 _Avoid_: Dashboard, Menu, Home page
 
 **GAS schema**
-The JSON schema fetched from `grants-config-grasslands` into `test/schemas/gas.schema.json`, used to validate a submitted application's `answers` payload shape.
+The GAS JSON schema at `configurations/grasslands/gas/gas.json` in `grants-config-grasslands`, fetched with the journey tests and used to validate a submitted application's `answers` payload shape.
 _Avoid_: GAS response, Submission payload (when the schema file itself is meant)
+
+**Config release**
+A tagged release of `grants-config-grasslands` (e.g. `0.24.2`). The journey tests and the journey config ship together in it, and each run fetches the latest one unless `GRASSLANDS_TAG` pins one.
+_Avoid_: Test version, Test image tag, grants-ui version

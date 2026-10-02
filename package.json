@@ -9,9 +9,8 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "scripts": {
-    "test": "playwright test --config=playwright.cdp.config.js",
-    "test:local": "playwright test --config=playwright.local.config.js",
-    "test:ci": "playwright test --config=playwright.ci.config.js",
+    "test": "sh scripts/fetch-tests.sh && playwright test --config=playwright.cdp.config.js",
+    "test:local": "sh scripts/fetch-tests.sh && playwright test --config=playwright.local.config.js",
     "report:publish": "./bin/publish-tests.sh"
   },
   "dependencies": {

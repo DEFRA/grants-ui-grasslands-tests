@@ -12,5 +12,5 @@ node_modules
 npm-debug.log
 playwright-report/
 test-results/
-test/schemas/
 AGENTS.local.md
+.grasslands-config/

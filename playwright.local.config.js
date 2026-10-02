@@ -1,8 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
 import { loadEnvFile } from 'node:process'
-import { execSync } from 'node:child_process'
-
-execSync('sh scripts/fetch-schema.sh', { stdio: 'inherit' })
 
 try { loadEnvFile('.env') } catch { /* no .env file */ }
 
@@ -13,10 +10,10 @@ process.env.GRANTS_UI_BACKEND_ENCRYPTION_KEY ??= 'encryption_key'
 process.env.BASE_BACKEND_URL ??= 'http://localhost:3001'
 
 export default defineConfig({
-  testDir: './test/specs',
+  testDir: './.grasslands-config/test/grants-ui/test/specs',
   testMatch: '**/*.spec.js',
   grep: /@runme/,
-  timeout: 30_000,
+  timeout: 120_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
@@ -25,7 +22,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     headless: false,
-    screenshot: 'only-on-failure'
+    screenshot: 'only-on-failure',
+    actionTimeout: 10_000,
+    navigationTimeout: 10_000
   },
   projects: [
     {

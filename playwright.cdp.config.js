@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 process.env.BASE_BACKEND_URL = `https://grants-ui-backend.${process.env.ENVIRONMENT}.cdp-int.defra.cloud`
 
 export default defineConfig({
-  testDir: './test/specs',
+  testDir: './.grasslands-config/test/grants-ui/test/specs',
   testMatch: '**/*.spec.js',
   grep: /@cdp/,
   timeout: 60_000,

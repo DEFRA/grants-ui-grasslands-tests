@@ -1,6 +1,8 @@
 # grants-ui-grasslands-tests
 
-Playwright journey test suite for the Grasslands grant.
+Runner for the Grasslands grant journey tests on the CDP Portal and against a local grants-ui.
+
+The tests themselves live in [grants-config-grasslands](https://github.com/DEFRA/grants-config-grasslands) under `test/grants-ui`, alongside the journey config they exercise. This repo holds no specs: on every run it fetches the config repo at its latest release tag into `.grasslands-config/` (gitignored) and runs the tests from there. This is the same tag grants-ui's CI uses. Set `GRASSLANDS_TAG` to pin a release, e.g. `GRASSLANDS_TAG=0.24.2 npm run test:local`.
 
 ## What This Tests
 
@@ -39,7 +41,7 @@ Default environment variables for local runs are set in `playwright.local.config
 
 ## Running the Test Suite
 
-There are three Playwright configuration files for different environments:
+There are two Playwright configuration files for different environments:
 
 ### Local Development — playwright.local.config.js
 
@@ -63,32 +65,13 @@ npm test
 - Publishes an HTML report to S3
 - Runs in Microsoft Edge (Playwright's `msedge` channel). The CDP Portal runner is Linux, so this is the Linux build of Edge rather than true Windows Edge — best endeavours coverage, not a substitute for testing on Windows Edge directly
 
-### CI Pipeline — playwright.ci.config.js
-
-```bash
-npm run test:ci
-```
-
-- Runs against the URL specified by the `BASE_URL` env var
-- Used in the `grants-ui` GitHub Actions CI pipeline
-- Automated execution on creating and updating a `grants-ui` PR
-- No report generated, console logging only
-
-## Test Coverage
-
-| Spec | Description |
-|---|---|
-| `smoke.spec.js` | Navigates to the grasslands start page and confirms it loads. |
-
 ## Project Structure
 
 ```
 grants-ui-grasslands-tests/
-├── test/
-│   └── specs/
+├── scripts/fetch-tests.sh      # Fetches the tests from grants-config-grasslands
 ├── playwright.cdp.config.js    # CDP Portal config
-├── playwright.local.config.js  # Local development config
-└── playwright.ci.config.js     # CI pipeline config
+└── playwright.local.config.js  # Local development config
 ```
 
 ## Test Reports
@@ -105,6 +88,7 @@ The native Playwright HTML report is used. When running on CDP, the report is au
 
 ## Related Repositories
 
+- [grants-config-grasslands](https://github.com/DEFRA/grants-config-grasslands) - Grasslands config and the journey tests themselves
 - [grants-ui](https://github.com/DEFRA/grants-ui) - The main grants application UI service
 
 ## Support

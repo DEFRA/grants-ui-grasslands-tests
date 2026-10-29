@@ -104,9 +104,9 @@ Journey tests that require sign-in should authenticate via the `Defra ID` OIDC p
 Each spec must supply its own CRN so tests can run in parallel without sharing session state.
 **Password:** hardcoded as `x` (the stub always accepts this password)
 
-**Test user:** CRN `1103171356` / SBI `107214733` ("Giles Edwin Vardey" / "Kirsten Shenton"), sourced from `grants-ui/fcp-defra-id-stub/users.json` and `grants-ui-dal-stub/fixtures/land-data/107214733.json`. Chosen because:
-- it is not already used by `grants-ui/acceptance` feature tests, `grants-ui-woodland-tests`, or `land-grants-journey-tests` (all checked at the time of writing — re-check before reusing a CRN for a second test user, to keep parallel runs isolated)
-- its land parcels (e.g. sheet `SD8545` parcel `7357`) have land cover class codes (130/131) in `land-grants-api`'s seed data (`src/land-data/land_covers/covers.csv`) that are eligible for all three of grasslands' `enabledLandActions` (`CLIG3`, `CSAM3`, `SCR2`), per `src/land-data/land_cover_codes/land_cover_codes_actions.csv`
+**Test user:** the CRN and SBI are set in the spec, which lives in `grants-config-grasslands` (`test/grants-ui`) and is fetched by `scripts/fetch-tests.sh`. Pick a user that is present in `grants-ui/fcp-defra-id-stub/users.json`, never a real-looking CRN or SBI. Choose one that:
+- is not already used by `grants-ui/acceptance` feature tests, `grants-ui-woodland-tests`, or `land-grants-journey-tests` (re-check before reusing a CRN for a second test user, to keep parallel runs isolated)
+- has land parcels with land cover class codes (130/131) in `land-grants-api`'s seed data (`src/land-data/land_covers/covers.csv`) that are eligible for all three of grasslands' `enabledLandActions` (`CLIG3`, `CSAM3`, `SCR2`), per `src/land-data/land_cover_codes/land_cover_codes_actions.csv`
 
 If a second test user is ever needed (e.g. for parallel specs), cross-check candidate CRNs against those same three repos first.
 
